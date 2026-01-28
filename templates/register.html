@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-body p-4">
+                    <h3 class="mb-4 text-center text-primary fw-bold">Register Organization</h3>
+                    <form method="POST" autocomplete="off">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="organization_name" name="organization_name" placeholder="Organization Name" value="{{ prelim.organization_name }}" required>
+                            <label for="organization_name">Organization Name</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="service_requested" name="service_requested" placeholder="Service Requested" value="{{ prelim.service_requested }}" required>
+                            <label for="service_requested">Service Requested</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <textarea class="form-control" id="remarks" name="remarks" placeholder="Remarks" style="height: 100px">{{ prelim.remarks }}</textarea>
+                            <label for="remarks">Remarks</label>
+                        </div>
+
+                        <label class="mt-3">Date Received</label>
+                        <input type="date" class="form-control mb-3" name="date_received">
+
+                        <label class="mt-3">Designate</label>
+                        <select class="form-select mb-3" name="designate">
+                            <option value="">-- Select Designate --</option>
+                            <option value="Asha">Asha</option>
+                            <option value="B. Odero">B. Odero</option>
+                            <option value="D.O.S">D.O.S</option>
+                            <option value="Eileen">Eileen</option>
+                            <option value="Eric Njoroge">Eric Njoroge</option>
+                            <option value="Esther">Esther</option>
+                            <option value="Eznner">Eznner</option>
+                            <option value="Finance - Allan">Finance - Allan</option>
+                            <option value="Finance - Muktar">Finance - Muktar</option>
+                            <option value="Finance - Njane">Finance - Njane</option>
+                            <option value="Habiba">Habiba</option>
+                            <option value="Judy">Judy</option>
+                            <option value="Kamande">Kamande</option>
+                            <option value="Legal - Vitalis">Legal - Vitalis</option>
+                            <option value="L.O - Cate">L.O - Cate</option>
+                            <option value="L.O. - Cate">L.O. - Cate</option>
+                            <option value="L.O. - Juliet">L.O. - Juliet</option>
+                            <option value="L.O. - Lynn">L.O. - Lynn</option>
+                            <option value="L.O. - Mercy">L.O. - Mercy</option>
+                            <option value="L.O. - Michelle">L.O. - Michelle</option>
+                            <option value="Naomi">Naomi</option>
+                            <option value="N. Sankale">N. Sankale</option>
+                            <option value="Rukia">Rukia</option>
+                            <option value="S.Monyoncho">S.Monyoncho</option>
+                            <option value="Sarah">Sarah</option>
+                            <option value="SDOR">SDOR</option>
+                            <option value="Sankale">Sankale</option>
+                            <option value="Topisia">Topisia</option>
+                        </select>
+
+
+                        <label class="mt-3">Filed by Registry for Action</label>
+                        <select class="form-select mb-3" name="filed_by_registry_action">
+                            <option value="Filed">Filed</option>
+                            <option value="Not Filed">Not Filed</option>
+                        </select>
+
+                        <label class="mt-3">Date Filed</label>
+                        <input type="date" class="form-control mb-3" name="date_filed">
+
+                        <label class="mt-3">Received by Designate</label>
+                        <select class="form-select mb-3" name="received_by_designate">
+                            <option value="Received">Received</option>
+                            <option value="Not Received">Not Received</option>
+                        </select>
+
+                        <label class="mt-3">Date Received by Designate</label>
+                        <input type="date" class="form-control mb-3" name="date_received_by_designate">
+
+
+                        <label class="mt-3">Correction Required</label>
+                        <select class="form-select mb-3" name="correction_sent">
+                            <option value="Correction Sent">Correction Sent</option>
+                            <option value="No Correction Sent">No Correction Sent</option>
+                        </select>
+
+                        <label class="mt-3">Date Correction Required</label>
+                        <input type="date" class="form-control mb-3" name="date_correction_required">
+
+                        <!-- 'Staff Sent Correction Email' and 'Sent By' removed (not in canonical CSV) -->
+
+                        <label class="mt-3">Corrections Done by Client</label>
+                        <select class="form-select mb-3" name="correction_status">
+                            <option value="Correction Done">Correction Done</option>
+                            <option value="Correction Not Done">Correction Not Done</option>
+                            <option value="Not Required">Not Required</option>
+                        </select>
+
+                        <label class="mt-3">Date Corrections Done</label>
+                        <input type="date" class="form-control mb-3" name="date_corrections_done">
+
+                        <label class="mt-3">Status</label>
+                        <select class="form-select mb-3" name="status">
+                            <option value="Completed">Completed</option>
+                            <option value="Incomplete">Incomplete</option>
+                        </select>
+
+                        <label class="mt-3">Date Completed</label>
+                        <input type="date" class="form-control mb-3" name="date_completed">
+
+                        <label class="mt-3">Authorization</label>
+                        <select class="form-select mb-3" name="authorization">
+                            <option value="Authorized">Authorized</option>
+                            <option value="Unauthorized">Unauthorized</option>
+                        </select>
+
+                        <label class="mt-3">Date Authorised</label>
+                        <input type="date" class="form-control mb-3" name="date_authorised">
+
+                        <label class="mt-3">Signatory</label>
+                        <select class="form-select mb-3" name="signatory">
+                            <option value="Monyoncho">Monyoncho</option>
+                            <option value="I.Sang">I.Sang</option>
+                        </select>
+
+                        <label class="mt-3">Dispatch</label>
+                        <select class="form-select mb-3" name="dispatch">
+                            <option value="Dispatched">Dispatched</option>
+                            <option value="Not Dispatched">Not Dispatched</option>
+                        </select>
+
+                        <label class="mt-3">Date Dispatched</label>
+                        <input type="date" class="form-control mb-3" name="date_dispatched">
+
+                        <button type="submit" class="btn btn-primary w-100 py-2 fw-bold" style="font-size: 1.1rem;">
+                            <i class="bi bi-arrow-right-circle me-2"></i>Save Record
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Sign Up</h2>
+    <form method="POST">
+        <div class="mb-3">
+            <label for="name" class="form-label">Name</label>
+            <input type="text" class="form-control" id="name" name="name" required>
+        </div>
+        <div class="mb-3">
+            <label for="email" class="form-label">Work Email</label>
+            <input type="email" class="form-control" id="email" name="email" required>
+        </div>
+        <div class="mb-3">
+            <label for="department" class="form-label">Department</label>
+            <input type="text" class="form-control" id="department" name="department" required>
+        </div>
+        <div class="mb-3">
+            <label for="work_title" class="form-label">Work Title</label>
+            <input type="text" class="form-control" id="work_title" name="work_title" required>
+        </div>
+        <div class="mb-3">
+            <label for="role" class="form-label">Role</label>
+            <select class="form-select" id="role" name="role" required>
+                <option value="staff">Staff</option>
+                <option value="admin">Admin</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" name="password" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Sign Up</button>
+    </form>
+    <p class="mt-3">Already have an account? <a href="{{ url_for('routes.login') }}">Login here</a>.</p>
+</div>
+{% endblock %}

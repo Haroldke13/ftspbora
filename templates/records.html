@@ -1,0 +1,524 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+            /* Fixed horizontal scroll bar */
+            #fixed-x-scrollbar {
+                position: fixed;
+                left: 0;
+                bottom: 0;
+                width: 100vw;
+                height: 24px;
+                background: #f4f8fb;
+                z-index: 1000;
+                overflow-x: auto;
+                overflow-y: hidden;
+                border-top: 1px solid #eee;
+                display: none;
+            }
+            #fixed-x-scrollbar-inner {
+                min-width: 1800px;
+                height: 1px;
+            }
+    /* 2026 Modern Table UI */
+    .table-responsive {
+        border-radius: 18px;
+        box-shadow: 0 6px 32px rgba(0,0,0,0.10);
+        background: #fafdff;
+        padding: 0;
+        margin-bottom: 2rem;
+        overflow-x: auto;
+        width: 100%;
+    }
+    #records-table {
+        min-width: 1800px;
+        border-radius: 16px;
+        overflow: hidden;
+        background: #fff;
+    }
+    #records-table th, #records-table td {
+        font-size: 1.04rem;
+        padding: 0.65rem 0.5rem;
+        border: none;
+    }
+    #records-table th {
+        color: #0a58ca;
+        font-weight: 800;
+        background: linear-gradient(90deg, #f4f8fb 80%, #e3f2fd 100%);
+        border-bottom: 2px solid #ffd700;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        white-space: nowrap;
+        letter-spacing: 0.01em;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    #records-table thead {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: #f4f8fb;
+    }
+    #records-table tbody tr:nth-child(even) {
+        background: #f8fafc;
+    }
+    #records-table tbody tr:nth-child(odd) {
+        background: #fff;
+    }
+    #records-table tr:hover {
+        background: #e3f2fd !important;
+        transition: background 0.2s;
+    }
+    #records-table td {
+        vertical-align: middle;
+        background: transparent;
+        border-bottom: 1px solid #e9ecef;
+        white-space: pre-line;
+        word-break: break-word;
+        max-width: 320px;
+        font-size: 1.01rem;
+    }
+    #records-table th:first-child, #records-table td:first-child {
+        text-align: center;
+        background: #fafdff;
+        font-weight: bold;
+        color: #0a58ca;
+        min-width: 60px;
+        max-width: 80px;
+    }
+    #records-table th:last-child, #records-table td:last-child {
+        text-align: center;
+        background: #fafdff;
+        min-width: 90px;
+        max-width: 120px;
+    }
+    #records-table td input,
+    #records-table td select {
+        min-width: 120px;
+        max-width: 100%;
+        border-radius: 6px;
+        border: 1px solid #e3e3e3;
+        background: #fafdff;
+        font-size: 0.98rem;
+        padding: 0.25rem 0.5rem;
+        transition: border 0.2s;
+    }
+    #records-table td input:focus,
+    #records-table td select:focus {
+        border: 1.5px solid #0a58ca;
+        outline: none;
+        background: #e3f2fd;
+    }
+    .btn-group .btn-warning {
+        background: linear-gradient(90deg, #ffd700 60%, #fffbe6 100%);
+        color: #0a58ca;
+        border: 1px solid #ffd700;
+        font-weight: 700;
+        box-shadow: 0 1px 4px rgba(255,215,0,0.08);
+        border-radius: 4px 0 0 4px;
+        padding: 2px 14px;
+        font-size: 0.95rem;
+        transition: background 0.2s, color 0.2s;
+    }
+    .btn-group .btn-warning:hover {
+        background: linear-gradient(90deg, #fffbe6 60%, #ffd700 100%);
+        color: #222;
+    }
+    .btn-danger {
+        background: linear-gradient(90deg, #dc3545 60%, #ffb3b3 100%);
+        color: #fff;
+        border: 1px solid #dc3545;
+        font-weight: 700;
+        border-radius: 0 4px 4px 0;
+        padding: 2px 14px;
+        font-size: 0.95rem;
+        transition: background 0.2s, color 0.2s;
+    }
+    .btn-danger:hover {
+        background: linear-gradient(90deg, #ffb3b3 60%, #dc3545 100%);
+        color: #222;
+    }
+    #add-row-form td {
+        background: #fffbe6;
+    }
+    /* Widen key columns for better visibility */
+    #records-table th:nth-child(2), /* Organization */
+    #records-table th:nth-child(3), /* Service */
+    #records-table th:nth-child(4), /* Remarks */
+    #records-table th:nth-child(11), /* Correction Status */
+    #records-table td:nth-child(2),
+    #records-table td:nth-child(3),
+    #records-table td:nth-child(4),
+    #records-table td:nth-child(11),
+    #records-table td:nth-child(12),
+    #records-table td:nth-child(13) {
+        min-width: 200px;
+        max-width: 400px;
+    }
+    @media (max-width: 991px) {
+        .table-responsive {
+            box-shadow: none;
+            border-radius: 0;
+            padding: 0;
+        }
+        #records-table th, #records-table td {
+            font-size: 0.95rem;
+            padding: 0.5rem;
+        }
+    }
+</style>
+<div class="d-flex justify-content-center align-items-center mb-4" style="gap: 1rem;">
+    <form method="GET" class="d-flex align-items-center" style="gap: 0.5rem;">
+        <div class="input-group">
+            <span class="input-group-text bg-primary text-warning border-danger">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                  <path d="M11 6a5 5 0 1 1-2-9.9A5 5 0 0 1 11 6zm-1.293 7.707a1 1 0 0 1-1.414 0l-3.387-3.387A6.5 6.5 0 1 1 13.5 6.5a6.5 6.5 0 0 1-6.5 6.5c-.828 0-1.627-.162-2.357-.457l3.387 3.387a1 1 0 0 1 0 1.414z"/>
+                </svg>
+            </span>
+            <input type="text" name="search" class="form-control border-danger" placeholder="Search a word..." style="border-radius: 0 4px 4px 0;">
+        </div>
+        <select name="column" class="form-select border-danger" style="max-width: 200px;">
+            <option value="">All Columns</option>
+            <option value="id">ID</option>
+            <option value="organization_name">Name of the Organization</option>
+            <option value="service_requested">Service Requested</option>
+            <option value="remarks">Remarks</option>
+            <option value="date_received">Date Received</option>
+            <option value="designate">Designate</option>
+            <option value="filed_by_registry_action">Filed by Registry for Action</option>
+            <option value="date_filed">Date Filed</option>
+            <option value="received_by_designate">Received by Designate</option>
+            <option value="date_received_by_designate">Date Received by Designate</option>
+            <option value="correction_sent">Correction Required</option>
+            <option value="date_correction_required">Date Correction Required</option>
+            <option value="correction_status">Corrections Done by Client</option>
+            <option value="date_corrections_done">Date Corrections done by Client</option>
+            <option value="status">Status</option>
+            <option value="date_completed">Date Completed</option>
+            <option value="authorization">Authorization</option>
+            <option value="date_authorised">Date Authorised</option>
+            <option value="signatory">Signatory</option>
+            <option value="dispatch">Dispatch</option>
+            <option value="date_dispatched">Date Dispatched</option>
+        </select>
+        <button type="submit" class="btn btn-primary border-danger text-warning fw-bold">Search</button>
+    </form>
+</div>
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <div>
+        {% if pagination %}
+            <span class="fw-bold text-primary">Total records: {{ pagination.total }}</span>
+        {% else %}
+            <span class="fw-bold text-primary">Total records: {{ files|length }}</span>
+        {% endif %}
+    </div>
+    <button class="btn btn-success btn-sm" id="add-row-btn" type="button">
+        <i class="bi bi-plus-circle"></i> Add Row
+    </button>
+</div>
+<div class="container-fluid px-0 px-md-3">
+    <div class="table-responsive" id="table-scroll-container">
+        <table id="records-table" class="table table-hover align-middle mb-0">
+        <thead>
+    </div>
+    <!-- Fixed horizontal scroll bar -->
+    <div id="fixed-x-scrollbar">
+        <div id="fixed-x-scrollbar-inner"></div>
+    </div>
+    <tr>
+        {% for col, label in [
+            ('id', 'ID'),
+            ('organization_name', 'Name of the Organization'),
+            ('service_requested', 'Service Requested'),
+            ('remarks', 'Remarks'),
+            ('date_received', 'Date Received'),
+            ('designate', 'Designate'),
+            ('filed_by_registry_action', 'Filed by Registry for Action'),
+            ('date_filed', 'Date Filed'),
+            ('received_by_designate', 'Received by Designate'),
+            ('date_received_by_designate', 'Date Received by Designate'),
+            ('correction_sent', 'Correction Required'),
+            ('date_correction_required', 'Date Correction Required'),
+            ('correction_status', 'Corrections Done by Client'),
+            ('date_corrections_done', 'Date Corrections done by Client'),
+            ('status', 'Status'),
+            ('date_completed', 'Date Completed'),
+            ('authorization', 'Authorization'),
+            ('date_authorised', 'Date Authorised'),
+            ('signatory', 'Signatory'),
+            ('dispatch', 'Dispatch'),
+            ('date_dispatched', 'Date Dispatched')
+        ] %}
+        <th>
+            <a href="?page={{ page }}&search={{ search }}&column={{ column }}&sort_by={{ col }}&sort_order={% if sort_by == col and sort_order == 'asc' %}desc{% else %}asc{% endif %}">
+                {{ label }}
+                {% if sort_by == col %}
+                    <span>{% if sort_order == 'asc' %}&uarr;{% else %}&darr;{% endif %}</span>
+                {% endif %}
+            </a>
+        </th>
+        {% endfor %}
+        <th></th>
+    </tr>
+    </thead>
+    <!-- Add Row Form (hidden by default, just below header) -->
+    <tr id="add-row-form" style="display: none;">
+        <form method="POST" action="{{ url_for('routes.add_row') }}">
+            <td></td>
+            <td><input type="text" name="organization_name" class="form-control form-control-sm" required></td>
+            <td><input type="text" name="service_requested" class="form-control form-control-sm" required></td>
+            <td><input type="text" name="remarks" class="form-control form-control-sm"></td>
+            <td><input type="date" name="date_received" class="form-control form-control-sm"></td>
+            <td>
+                <select name="designate" class="form-select form-select-sm">
+                    <option value="">--</option>
+                    {% for val in ['Asha','B. Odero','D.O.S','Eileen','Eric Njoroge','Esther','Eznner','Finance - Allan','Finance - Muktar','Finance - Njane','Habiba','Judy','Kamande','Legal - Vitalis','L.O - Cate','L.O. - Cate','L.O. - Juliet','L.O. - Lynn','L.O. - Mercy','L.O. - Michelle','Naomi','N. Sankale','Rukia','S.Monyoncho','Sarah','SDOR','Sankale','Topisia'] %}
+                    <option value="{{ val }}">{{ val }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td>
+                <select name="filed_by_registry_action" class="form-select form-select-sm">
+                    <option value="">--</option>
+                    {% for val in ['Filed','Not Filed'] %}
+                    <option value="{{ val }}">{{ val }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td><input type="date" name="date_filed" class="form-control form-control-sm"></td>
+            <td>
+                <select name="received_by_designate" class="form-select form-select-sm">
+                    <option value="">--</option>
+                    {% for val in ['Received','Not Received'] %}
+                    <option value="{{ val }}">{{ val }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td><input type="date" name="date_received_by_designate" class="form-control form-control-sm"></td>
+            <td>
+                <select name="correction_sent" class="form-select form-select-sm">
+                    <option value="">--</option>
+                    {% for val in ['Correction Sent','No Correction Sent'] %}
+                    <option value="{{ val }}">{{ val }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td><input type="date" name="date_correction_required" class="form-control form-control-sm"></td>
+            <td>
+                <select name="correction_status" class="form-select form-select-sm">
+                    <option value="">--</option>
+                    {% for val in ['Correction Done','Correction Not Done','Not Required'] %}
+                    <option value="{{ val }}">{{ val }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td><input type="date" name="date_corrections_done" class="form-control form-control-sm"></td>
+            <td>
+                <select name="status" class="form-select form-select-sm">
+                    <option value="">--</option>
+                    {% for val in ['Completed','Incomplete'] %}
+                    <option value="{{ val }}">{{ val }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td><input type="date" name="date_completed" class="form-control form-control-sm"></td>
+            <td>
+                <select name="authorization" class="form-select form-select-sm">
+                    <option value="">--</option>
+                    {% for val in ['Authorized','Unauthorized'] %}
+                    <option value="{{ val }}">{{ val }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td><input type="date" name="date_authorised" class="form-control form-control-sm"></td>
+            <td>
+                <select name="signatory" class="form-select form-select-sm">
+                    <option value="">--</option>
+                    {% for val in ['Monyoncho','I.Sang'] %}
+                    <option value="{{ val }}">{{ val }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td>
+                <select name="dispatch" class="form-select form-select-sm">
+                    <option value="">--</option>
+                    {% for val in ['Dispatched','Not Dispatched'] %}
+                    <option value="{{ val }}">{{ val }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td><input type="date" name="date_dispatched" class="form-control form-control-sm"></td>
+            <td><button type="submit" class="btn btn-primary btn-sm">Save</button></td>
+        </form>
+    </tr>
+    {% for f in files %}
+    <tr id="row-{{ f.id }}">
+        <form method="POST" action="{{ url_for('routes.edit_enum', file_id=f.id) }}" class="enum-edit-form">
+            <td>{{ f.id }}</td>
+            <td>{{ f.organization_name }}</td>
+            <td>{{ f.service_requested }}</td>
+            <td>{{ f.remarks }}</td>
+            <td>
+                <input type="date" name="date_received" class="form-control form-control-sm" value="{{ f.date_received if f.date_received else '' }}">
+            </td>
+            <td>
+                <select name="designate" class="form-select form-select-sm">
+                    <option value="">--</option>
+                    {% for val in ['Asha','B. Odero','D.O.S','Eileen','Eric Njoroge','Esther','Eznner','Finance - Allan','Finance - Muktar','Finance - Njane','Habiba','Judy','Kamande','Legal - Vitalis','L.O - Cate','L.O. - Cate','L.O. - Juliet','L.O. - Lynn','L.O. - Mercy','L.O. - Michelle','Naomi','N. Sankale','Rukia','S.Monyoncho','Sarah','SDOR','Sankale','Topisia'] %}
+                    <option value="{{ val }}" {% if f.designate == val %}selected{% endif %}>{{ val }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td>
+                <select name="filed_by_registry_action" class="form-select form-select-sm">
+                    <option value="">--</option>
+                    {% for val in ['Filed','Not Filed'] %}
+                    <option value="{{ val }}" {% if f.filed_by_registry_action == val %}selected{% endif %}>{{ val }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td>
+                <input type="date" name="date_filed" class="form-control form-control-sm" value="{{ f.date_filed if f.date_filed else '' }}">
+            </td>
+            <td>
+                <select name="received_by_designate" class="form-select form-select-sm">
+                    <option value="">--</option>
+                    {% for val in ['Received','Not Received'] %}
+                    <option value="{{ val }}" {% if f.received_by_designate == val %}selected{% endif %}>{{ val }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td>
+                <input type="date" name="date_received_by_designate" class="form-control form-control-sm" value="{{ f.date_received_by_designate if f.date_received_by_designate else '' }}">
+            </td>
+            <td>
+                <select name="correction_sent" class="form-select form-select-sm">
+                    <option value="">--</option>
+                    {% for val in ['Correction Sent','No Correction Sent'] %}
+                    <option value="{{ val }}" {% if f.correction_sent == val %}selected{% endif %}>{{ val }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td>
+                <input type="date" name="date_correction_required" class="form-control form-control-sm" value="{{ f.date_correction_required if f.date_correction_required else '' }}">
+            </td>
+            <td>
+                <select name="correction_status" class="form-select form-select-sm">
+                    <option value="">--</option>
+                    {% for val in ['Correction Done','Correction Not Done','Not Required'] %}
+                    <option value="{{ val }}" {% if f.correction_status == val %}selected{% endif %}>{{ val }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td>
+                <input type="date" name="date_corrections_done" class="form-control form-control-sm" value="{{ f.date_corrections_done if f.date_corrections_done else '' }}">
+            </td>
+            <td>
+                <select name="status" class="form-select form-select-sm">
+                    <option value="">--</option>
+                    {% for val in ['Completed','Incomplete'] %}
+                    <option value="{{ val }}" {% if f.status == val %}selected{% endif %}>{{ val }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td>
+                <input type="date" name="date_completed" class="form-control form-control-sm" value="{{ f.date_completed if f.date_completed else '' }}">
+            </td>
+            <td>
+                <select name="authorization" class="form-select form-select-sm">
+                    <option value="">--</option>
+                    {% for val in ['Authorized','Unauthorized'] %}
+                    <option value="{{ val }}" {% if f.authorization == val %}selected{% endif %}>{{ val }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td>
+                <input type="date" name="date_authorised" class="form-control form-control-sm" value="{{ f.date_authorised if f.date_authorised else '' }}">
+            </td>
+            <td>
+                <select name="signatory" class="form-select form-select-sm">
+                    <option value="">--</option>
+                    {% for val in ['Monyoncho','I.Sang'] %}
+                    <option value="{{ val }}" {% if f.signatory == val %}selected{% endif %}>{{ val }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td>
+                <select name="dispatch" class="form-select form-select-sm">
+                    <option value="">--</option>
+                    {% for val in ['Dispatched','Not Dispatched'] %}
+                    <option value="{{ val }}" {% if f.dispatch == val %}selected{% endif %}>{{ val }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td>
+                <input type="date" name="date_dispatched" class="form-control form-control-sm" value="{{ f.date_dispatched if f.date_dispatched else '' }}">
+            </td>
+            <td>
+                <div class="btn-group btn-group-sm" role="group" style="vertical-align: middle;">
+                    <button type="submit" class="btn btn-warning px-2 py-1" style="font-size:0.85rem; border-radius: 4px 0 0 4px; min-width: 48px;">Save</button>
+                </div>
+            </td>
+            <td>
+                <button type="submit" formaction="{{ url_for('routes.delete_file', file_id=f.id) }}" formmethod="POST" class="btn btn-danger px-2 py-1" style="font-size:0.85rem; border-radius: 0 4px 4px 0; min-width: 48px;" onclick="return confirm('Are you sure you want to delete this record?');">Delete</button>
+            </td>
+        </form>
+    </tr>
+        {% endfor %}
+        </table>
+    </div>
+</div>
+<div class="d-flex justify-content-center align-items-center my-3 flex-wrap" style="gap: 1rem;">
+    {% if pagination and pagination.pages > 1 %}
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+                    <a class="page-link" href="?page={{ pagination.prev_num }}&search={{ search }}&column={{ column }}" tabindex="-1">Previous</a>
+                </li>
+                <li class="page-item disabled">
+                    <span class="page-link">Page {{ pagination.page }} of {{ pagination.pages }}</span>
+                </li>
+                <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+                    <a class="page-link" href="?page={{ pagination.next_num }}&search={{ search }}&column={{ column }}">Next</a>
+                </li>
+            </ul>
+        </nav>
+    {% endif %}
+</div>
+<script>
+        // Fixed horizontal scroll bar logic
+        const tableScroll = document.getElementById('table-scroll-container');
+        const fixedBar = document.getElementById('fixed-x-scrollbar');
+        const fixedBarInner = document.getElementById('fixed-x-scrollbar-inner');
+        function syncScroll(e) {
+            if (e.target === tableScroll) {
+                fixedBar.scrollLeft = tableScroll.scrollLeft;
+            } else {
+                tableScroll.scrollLeft = fixedBar.scrollLeft;
+            }
+        }
+        tableScroll.addEventListener('scroll', syncScroll);
+        fixedBar.addEventListener('scroll', syncScroll);
+        // Show/hide fixed bar if table is wider than container
+        function updateFixedBar() {
+            if (tableScroll.scrollWidth > tableScroll.clientWidth) {
+                fixedBar.style.display = 'block';
+                fixedBarInner.style.minWidth = tableScroll.scrollWidth + 'px';
+            } else {
+                fixedBar.style.display = 'none';
+            }
+        }
+        window.addEventListener('resize', updateFixedBar);
+        window.addEventListener('DOMContentLoaded', updateFixedBar);
+        updateFixedBar();
+    // Toggle add row form
+    document.getElementById('add-row-btn').addEventListener('click', function() {
+        var addRow = document.getElementById('add-row-form');
+        if (addRow.style.display === 'none') {
+            addRow.style.display = '';
+            addRow.scrollIntoView({behavior: 'smooth', block: 'center'});
+        } else {
+            addRow.style.display = 'none';
+        }
+    });
+</script>
+{% endblock %}

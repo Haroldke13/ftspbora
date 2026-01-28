@@ -1,0 +1,15 @@
+gunicorn
+flask
+flask_sqlalchemy
+flask_migrate
+flask_mail
+flask_marshmallow
+marshmallow
+psycopg2-binary
+werkzeug
+sqlalchemy
+twilio
+authlib
+iso8601
+pandas
+datetime
