@@ -52,7 +52,7 @@ def clean_value(field, value):
     if field in DATE_FIELDS:
         # Try to parse as date, else return None
         try:
-            dt = pd.to_datetime(value, dayfirst=True, errors='coerce')
+            dt = pd.to_datetime(value, dayfirst=False, errors='coerce')
             if pd.isna(dt):
                 return None
             return dt.date()
