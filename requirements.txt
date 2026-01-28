@@ -14,4 +14,3 @@ iso8601
 pandas
 datetime
 dotenv
-smtplib
