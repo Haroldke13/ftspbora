@@ -33,8 +33,8 @@ ENV FLASK_ENV=production
 
 # Database setup
 RUN flask db init || true
-RUN python create_tables.py
-RUN python importcsv.py
+#RUN python create_tables.py
+#RUN python importcsv.py
 
 # Run the application
 CMD ["gunicorn", "app:app", "--bind", "0.0.0.0:10000", "--timeout", "120"]
