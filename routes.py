@@ -1,9 +1,11 @@
 
 
 from flask import session
+
 from threading import Thread
 from flask_mail import Message
-from app import app, mail
+from app import mail
+from flask import current_app
 
 
 from models import User
@@ -15,13 +17,13 @@ from sendsms import send_sms_notification, DESIGNATE_SMS
 routes = Blueprint("routes", __name__)
 
 
-# Asynchronous email sending utility
-def send_async_email(app, msg):
-    with app.app_context():
+ # Asynchronous email sending utility using current_app
+def send_async(msg):
+    with current_app.app_context():
         mail.send(msg)
 
 def send_email(msg):
-    Thread(target=send_async_email, args=(app, msg)).start()
+    Thread(target=send_async, args=(msg,)).start()
     
 
 # DELETE FILE ROUTE

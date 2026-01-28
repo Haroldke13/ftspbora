@@ -31,10 +31,7 @@ EXPOSE 10000
 ENV FLASK_APP=app.py
 ENV FLASK_ENV=production
 
-# Database setup
-RUN flask db init || true
-#RUN python create_tables.py
-#RUN python importcsv.py
-
-# Run the application
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["gunicorn", "app:app", "--bind", "0.0.0.0:10000", "--timeout", "120"]
