@@ -1,5 +1,7 @@
 import os
 from twilio.rest import Client
+import smtplib
+import dotenv
 
 class Config:
     SQLALCHEMY_DATABASE_URI = "sqlite:///dailytracking_db.sqlite"
@@ -10,21 +12,22 @@ class Config:
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16 MB
 
     # Email configuration
-    MAIL_SERVER = 'smtp.gmail.com'
-    MAIL_PORT = 587
-    MAIL_USE_TLS = True
-    MAIL_USERNAME = 'juellharold@gmail.com'
-    MAIL_PASSWORD = 'jegfsboukvpibium'
-    MAIL_DEFAULT_SENDER = 'juellharold@gmail.com'
+    MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
+    MAIL_PORT = int(os.environ.get('MAIL_PORT', 587))
+    MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'True') == 'True'
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+    MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER', MAIL_USERNAME)
+
 
     # Google OAuth configuration
-    GOOGLE_CLIENT_ID = '1052110297217-3pi3l4eqhktgocn2cjrvt03bqurvu2qq.apps.googleusercontent.com'
-    GOOGLE_CLIENT_SECRET = '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'
-    GOOGLE_DISCOVERY_URL = 'https://accounts.google.com/.well-known/openid-configuration'
+    GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
+    GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET')
+    GOOGLE_DISCOVERY_URL = os.environ.get('GOOGLE_DISCOVERY_URL', 'https://accounts.google.com/.well-known/openid-configuration')
 
-    TWILIO_ACCOUNT_SID = 'AC59522a6761edae997ba183dddf47dbd4'
-    TWILIO_AUTH_TOKEN = 'ae64f69c38e80d5f83b0ec73f7fd1596'
-    TWILIO_WHATSAPP_NUMBER = 'whatsapp:+14155238886'
+    TWILIO_ACCOUNT_SID = os.environ.get('TWILIO_ACCOUNT_SID')
+    TWILIO_AUTH_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN')
+    TWILIO_WHATSAPP_NUMBER = os.environ.get('TWILIO_WHATSAPP_NUMBER')
 
 def send_whatsapp_notification(designate_number, organization_name, service_requested):
     account_sid = Config.TWILIO_ACCOUNT_SID

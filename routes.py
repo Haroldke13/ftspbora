@@ -1,6 +1,11 @@
 
 
 from flask import session
+from threading import Thread
+from flask_mail import Message
+from app import app, mail
+
+
 from models import User
 from decorators import login_required, admin_required
 from flask import Blueprint, render_template, request, redirect, url_for, flash
@@ -9,6 +14,15 @@ from sendsms import send_sms_notification, DESIGNATE_SMS
 
 routes = Blueprint("routes", __name__)
 
+
+# Asynchronous email sending utility
+def send_async_email(app, msg):
+    with app.app_context():
+        mail.send(msg)
+
+def send_email(msg):
+    Thread(target=send_async_email, args=(app, msg)).start()
+    
 
 # DELETE FILE ROUTE
 @routes.route('/delete-file/<int:file_id>', methods=['POST'])
@@ -22,8 +36,6 @@ def delete_file(file_id):
     db.session.commit()
     # Notify designate via email
     from models import DESIGNATE_EMAILS
-    from flask_mail import Message
-    from app import mail
     email_sent = False
     if designate and designate in DESIGNATE_EMAILS:
         recipient = DESIGNATE_EMAILS[designate]
@@ -33,7 +45,7 @@ def delete_file(file_id):
                 recipients=[recipient],
                 body=f"The file for organization {org_name} has been deleted from the system."
             )
-            mail.send(msg)
+            send_email(msg)
             email_sent = True
         except Exception as e:
             flash(f"Error sending email to {designate}: {str(e)}", "danger")
@@ -146,28 +158,32 @@ def add_row():
         return redirect(url_for('routes.records'))
     db.session.add(file)
     db.session.commit()
-
-    # Email notification logic
-    from models import DESIGNATE_EMAILS
-    from flask_mail import Message
-    from app import mail
-    designate = file.designate
-    email_sent = False
-    if designate and designate in DESIGNATE_EMAILS:
-        recipient = DESIGNATE_EMAILS[designate]
-        try:
-            msg = Message(
-                subject=f"New File Assigned to {designate}",
-                recipients=[recipient],
-                body=f"A new file has been assigned to you as designate: {designate}. Please log in to view details."
-            )
-            mail.send(msg)
-            email_sent = True
-        except Exception as e:
-            flash(f"Error sending email to {designate}: {str(e)}", "danger")
-    if email_sent:
-        flash(f"Email sent to {designate}", "success")
-    flash('New record added!', 'success')
+    try:
+        # Email notification logic
+        from models import DESIGNATE_EMAILS
+        from flask_mail import Message
+        from app import mail
+        designate = file.designate
+        email_sent = False
+        if designate and designate in DESIGNATE_EMAILS:
+            recipient = DESIGNATE_EMAILS[designate]
+            try:
+                msg = Message(
+                    subject=f"New File Assigned to {designate}",
+                    recipients=[recipient],
+                    body=f"A new file has been assigned to you as designate: {designate}. Please log in to view details."
+                )
+                send_email(msg)
+                email_sent = True
+            except Exception as e:
+                flash(f"Error sending email to {designate}: {str(e)}", "danger")
+        if email_sent:
+            flash(f"Email sent to {designate}", "success")
+        flash('New record added!', 'success')
+    except Exception as e:
+        # Log the error or notify the user gracefully
+        print(f"Email send failed: {e}")
+        flash("Could not send email notification.", "warning")
     return redirect(url_for('routes.records'))
 
 
@@ -261,7 +277,7 @@ def edit_enum(file_id):
                     recipients=[recipient],
                     body=f"A file for {file.organization_name} has been updated. The following fields changed:\n\n{change_msg}\n\nPlease log in to view details."
                 )
-                mail.send(msg)
+                send_email(msg)
                 email_sent = True
             except Exception as e:
                 flash(f"Error sending email to {designate}: {str(e)}", "danger")
@@ -368,7 +384,7 @@ def register(record_id):
                     recipients=[recipient],
                     body=f"A new file has been assigned to you as designate: {designate}. Please log in to view details."
                 )
-                mail.send(msg)
+                send_email(msg)
                 email_sent = True
             except Exception as e:
                 flash(f"Error sending email to {designate}: {str(e)}", "danger")
@@ -480,12 +496,10 @@ def records():
 
 @routes.route('/test-email')
 def test_email():
-    from flask_mail import Message
-    from app import mail
     msg = Message(subject="Test Email", recipients=["joelharold@ymail.com"], body="This is a test.")
     try:
-        mail.send(msg)
-        return "Email sent!"
+        send_email(msg)
+        return "Email sent! (async)"
     except Exception as e:
         return f"Error: {e}"
 
